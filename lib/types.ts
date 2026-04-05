@@ -7,6 +7,8 @@ export interface ScenarioInputs {
   monthlyMediaSpend: number;
   activeCustomerCount: number;
   averageOrderValue: number;
+  /** Estimated share of paid media impressions currently reaching known existing customers. 0–1. */
+  existingCustomerMediaOverlap: number;
 }
 
 /**
@@ -33,5 +35,7 @@ export interface MonthlyProjection {
 
 /** Full engine output: one projection per calendar month, always length 12. */
 export interface ScenarioResult {
+  /** Unmodified monthly revenue baseline, used by UI to show headroom delta. */
+  baselineMonthlyRevenue: number;
   projections: MonthlyProjection[];
 }
