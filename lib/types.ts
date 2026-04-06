@@ -37,5 +37,7 @@ export interface MonthlyProjection {
 export interface ScenarioResult {
   /** Unmodified monthly revenue baseline, used by UI to show headroom delta. */
   baselineMonthlyRevenue: number;
+  /** Monthly media budget freed by lever 1, shown in UI even when reinvestment=0. */
+  monthlyMediaSaving: number;
   projections: MonthlyProjection[];
 }
