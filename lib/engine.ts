@@ -69,14 +69,23 @@ export function runScenario(
     const mid = baselineMonthlyRevenue + lever2Uplift + lever3Uplift;
 
     /**
-     * Uncertainty band: ±5% at month 1, widens linearly to ±20% at month 12.
-     * Reflects increasing forecast uncertainty over time; not lever-specific.
+     * Uncertainty band: asymmetric, ±3% month 1 → ±10% month 12.
+     *
+     * Low is anchored to baseline (not mid). Moving a lever is an execution bet:
+     * worst case, the levers didn't work and you end up at unimproved baseline
+     * minus time uncertainty — not at a levered-up mid minus variance.
+     * This produces a band that widens as levers increase, which is the correct
+     * commercial risk shape.
+     *
+     * low  = baselineMonthlyRevenue × (1 - uncertaintyFactor)  — anchored to baseline
+     * mid  = baselineMonthlyRevenue + lever2Uplift + lever3Uplift  — unchanged
+     * high = mid × (1 + uncertaintyFactor)  — full uplift plus variance
      */
-    const uncertaintyFactor = 0.05 + (month - 1) * (0.15 / 11);
+    const uncertaintyFactor = 0.03 + (month - 1) * (0.07 / 11);
 
     projections.push({
       month,
-      low: mid * (1 - uncertaintyFactor),
+      low: baselineMonthlyRevenue * (1 - uncertaintyFactor),
       mid,
       high: mid * (1 + uncertaintyFactor),
     });
