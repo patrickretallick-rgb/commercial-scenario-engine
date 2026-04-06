@@ -22,8 +22,9 @@ const LEVERS: LeverConfig[] = [
 ];
 
 export function SliderPanel({ sliders, onChange }: SliderPanelProps) {
-  function handleChange(key: keyof SliderParams, values: number[]) {
-    onChange({ ...sliders, [key]: values[0] / 100 });
+  function handleChange(key: keyof SliderParams, rawValue: number | readonly number[]) {
+    const v = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+    onChange({ ...sliders, [key]: v / 100 });
   }
 
   return (
@@ -46,7 +47,7 @@ export function SliderPanel({ sliders, onChange }: SliderPanelProps) {
               max={lever.displayMax}
               step={1}
               value={[displayValue]}
-              onValueChange={(values) => handleChange(lever.key, values as number[])}
+              onValueChange={(value) => handleChange(lever.key, value)}
             />
           </div>
         );
