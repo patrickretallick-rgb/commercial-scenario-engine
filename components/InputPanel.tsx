@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ScenarioInputs } from "@/lib/types";
@@ -26,19 +27,25 @@ const FIELDS: FieldConfig[] = [
   { key: "existingCustomerMediaOverlap", label: "Existing-customer media overlap",       suffix: "%", isPercent: true },
 ];
 
+function toDisplay(value: number, isPercent: boolean): string {
+  return isPercent ? String(Math.round(value * 100)) : String(value);
+}
+
 export function InputPanel({ inputs, onChange }: InputPanelProps) {
-  function handleChange(key: keyof ScenarioInputs, raw: string, isPercent: boolean) {
-    const parsed = parseFloat(raw);
-    if (isNaN(parsed)) return;
-    onChange({
-      ...inputs,
-      [key]: isPercent ? parsed / 100 : parsed,
-    });
+  const [displayValues, setDisplayValues] = useState<Record<keyof ScenarioInputs, string>>(
+    () => Object.fromEntries(
+      FIELDS.map((f) => [f.key, toDisplay(inputs[f.key], f.isPercent ?? false)])
+    ) as Record<keyof ScenarioInputs, string>
+  );
+
+  function handleChange(key: keyof ScenarioInputs, raw: string) {
+    setDisplayValues((prev) => ({ ...prev, [key]: raw }));
   }
 
-  function displayValue(field: FieldConfig): string {
-    const value = inputs[field.key];
-    return field.isPercent ? String(Math.round(value * 100)) : String(value);
+  function handleBlur(key: keyof ScenarioInputs, raw: string, isPercent: boolean) {
+    const parsed = parseFloat(raw);
+    if (isNaN(parsed) || parsed <= 0) return;
+    onChange({ ...inputs, [key]: isPercent ? parsed / 100 : parsed });
   }
 
   return (
@@ -58,8 +65,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             <Input
               id={field.key}
               type="number"
-              defaultValue={displayValue(field)}
-              onBlur={(e) => handleChange(field.key, e.target.value, field.isPercent ?? false)}
+              value={displayValues[field.key]}
+              onChange={(e) => handleChange(field.key, e.target.value)}
+              onBlur={(e) => handleBlur(field.key, e.target.value, field.isPercent ?? false)}
               className={field.prefix ? "pl-6" : field.suffix ? "pr-8" : ""}
             />
             {field.suffix && (
